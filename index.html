@@ -8,7 +8,6 @@
   <style>
 :root {
   --primary: #1a3e72;
-  --primary-dark: #16325c;
   --bg-light: #f5f7fb;
   --card-bg: #fff;
 }
@@ -21,7 +20,7 @@ body {
   padding: 15px;
 }
 
-/* Container card */
+/* Upload card */
 .report-card {
   background: var(--card-bg);
   max-width: 850px;
@@ -31,95 +30,82 @@ body {
   padding: 20px;
 }
 
-/* iframe (outside container) */
-#formWrapper {
-  display: none;
-  margin-top: 20px;
-}
-#formWrapper iframe {
-  width: 100%;
-  height: 100vh; /* full viewport height */
-  border: none;
-  border-radius: 8px;
-  background: #f9fafb;
-}
-
 @media (max-width: 600px) {
   .report-card { padding: 15px; }
 }
 
-/* Hide default file input */
-input[type="file"] {
-  display: none;
-}
-
+/* File upload styling */
+input[type="file"] { display: none; }
 .custom-file-upload label {
   cursor: pointer;
   min-width: 140px;
 }
-
 #fileName {
   display: block;
   margin-top: 6px;
   font-size: 0.85rem;
   color: #6c757d;
 }
+
+/* Fullscreen iframe */
+#formWrapper {
+  display: none;
+  width: 100%;
+  height: 100vh;
+}
+#formWrapper iframe {
+  width: 100%;
+  height: 100vh;
+  border: none;
+}
   </style>
 </head>
 <body>
-  <div class="container my-4">
+  <!-- Upload Section -->
+  <div id="uploadSection" class="container my-4">
     <div class="report-card shadow-sm rounded">
-      <!-- Header -->
       <div class="text-center mb-3">
         <h4 class="fw-semibold text-primary">🛡️ Safety Observation Report</h4>
         <p class="text-muted small mb-0">Report safety concerns and attach supporting files below</p>
       </div>
 
-      <!-- Upload Section -->
-      <div id="uploadSection">
-        <h6 class="fw-semibold mb-3">📎 Attach Files (Optional)</h6>
-        <form id="uploadForm">
-          <div class="custom-file-upload mb-3 text-center">
-            <input type="file" id="fileInput" />
-            <label for="fileInput" class="btn btn-outline-primary">Choose File</label>
-            <div id="fileName" class="text-muted small mt-2">No file chosen</div>
-          </div>
-          <div class="d-flex justify-content-center">
-            <button type="submit" id="uploadBtn" class="btn btn-primary" disabled>
-              Upload File
-            </button>
-          </div>
-        </form>
-        <div class="progress mt-3" id="progressContainer" style="display:none;">
-          <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" 
-               id="progressBar" role="progressbar" style="width:0%"></div>
+      <h6 class="fw-semibold mb-3">📎 Attach Files (Optional)</h6>
+      <form id="uploadForm">
+        <div class="custom-file-upload mb-3 text-center">
+          <input type="file" id="fileInput" />
+          <label for="fileInput" class="btn btn-outline-primary">Choose File</label>
+          <div id="fileName" class="text-muted small mt-2">No file chosen</div>
         </div>
-        <p id="message" class="mt-3"></p>
-        <div id="generatedCode" class="alert alert-info d-inline-block"></div>
         <div class="d-flex justify-content-center">
-          <button id="continueBtn" class="btn btn-success mt-3" style="display:none;">
-            Continue to Form
+          <button type="submit" id="uploadBtn" class="btn btn-primary" disabled>
+            Upload File
           </button>
         </div>
+      </form>
+
+      <div class="progress mt-3" id="progressContainer" style="display:none;">
+        <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" 
+             id="progressBar" role="progressbar" style="width:0%"></div>
       </div>
 
-      <!-- Footer -->
+      <p id="message" class="mt-3"></p>
+      <div id="generatedCode" class="alert alert-info d-inline-block"></div>
+      <div class="d-flex justify-content-center">
+        <button id="continueBtn" class="btn btn-success mt-3" style="display:none;">
+          Continue to Form
+        </button>
+      </div>
+
       <div class="text-center mt-4 small text-muted">
         Questions? Contact <a href="mailto:safety@company.com" class="fw-semibold">safety@company.com</a>
       </div>
     </div>
   </div>
 
-  <!-- Form Section (OUTSIDE container) -->
-  <div id="formWrapper" class="container-fluid px-0">
+  <!-- MS Form Fullscreen -->
+  <div id="formWrapper">
     <div id="loader" class="text-center p-3">⏳ Loading form...</div>
     <iframe id="msFormFrame" allowfullscreen></iframe>
-    <div class="d-flex justify-content-center mt-3">
-      <button id="finishBtn" class="btn btn-danger" style="display:none;">Finish & Close</button>
-    </div>
-    <p id="countdownMsg" style="display:none; text-align:center;">
-      Closing in <span id="countdown"></span> seconds...
-    </p>
   </div>
 
   <script>
@@ -135,21 +121,19 @@ const codeDisplay = document.getElementById('generatedCode');
 const progressContainer = document.getElementById('progressContainer');
 const progressBar = document.getElementById('progressBar');
 const continueBtn = document.getElementById('continueBtn');
-const finishBtn = document.getElementById('finishBtn');
-const countdownMsg = document.getElementById('countdownMsg');
-const countdownSpan = document.getElementById('countdown');
 const msFormFrame = document.getElementById('msFormFrame');
 const fileInput = document.getElementById("fileInput");
 const fileName = document.getElementById("fileName");
 const formWrapper = document.getElementById("formWrapper");
+const uploadSection = document.getElementById("uploadSection");
 
 fileInput.addEventListener("change", () => {
   if (fileInput.files.length > 0) {
     fileName.textContent = fileInput.files[0].name;
-    uploadBtn.disabled = false; // enable once a file is chosen
+    uploadBtn.disabled = false;
   } else {
     fileName.textContent = "No file chosen";
-    uploadBtn.disabled = true; // keep disabled if nothing
+    uploadBtn.disabled = true;
   }
 });
 
@@ -164,7 +148,6 @@ uploadForm.addEventListener('submit', (e) => {
     return; 
   }
 
-  // Show spinner inside button
   uploadBtn.disabled = true;
   uploadBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>Uploading...`;
 
@@ -221,33 +204,19 @@ uploadForm.addEventListener('submit', (e) => {
 });
 
 continueBtn.addEventListener("click", ()=>{
-  document.getElementById('uploadSection').style.display="none";
-  formWrapper.style.display="block";
+  uploadSection.style.display="none";   // Hide upload card
+  formWrapper.style.display="block";    // Show fullscreen form
 
-  // ✅ Embed link with &embed=true
+  // ✅ Embed MS Form fullscreen
   const baseUrl = "https://forms.office.com/Pages/ResponsePage.aspx?id=rXQPLm8G6kSc-VV7PC-NSeWT8yXfPp1Jnc9wKq4L7J9UMERCSURWRVg1SThXVkhVU1hYSTZSVzNSTi4u&embed=true";
   msFormFrame.src = `${baseUrl}&submissionID=${submissionID}`;
 
-  finishBtn.style.display="block";
+  // ✅ Auto-scroll to the form (mobile friendly)
+  setTimeout(() => {
+    formWrapper.scrollIntoView({ behavior: "smooth" });
+  }, 300);
 });
 
-// Finish and close
-finishBtn.addEventListener("click", ()=>{
-  finishBtn.style.display="none";
-  countdownMsg.style.display="block";
-  let counter = 3;
-  countdownSpan.textContent = counter;
-  const interval = setInterval(()=>{
-    counter--;
-    countdownSpan.textContent = counter;
-    if(counter===0){
-      clearInterval(interval);
-      window.close();
-    }
-  },1000);
-});
-
-// Show iframe after load
 msFormFrame.onload = function(){
   document.getElementById('loader').style.display='none';
   msFormFrame.style.display='block';
