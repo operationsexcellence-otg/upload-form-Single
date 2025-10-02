@@ -38,11 +38,11 @@ body {
   border-radius: 10px;
 }
 
+/* iframe visible by default but hidden until loaded */
 iframe {
   width: 100%;
   min-height: 80vh;
   border: none;
-  display: none;
   border-radius: 8px;
   background: #f9fafb;
 }
@@ -114,7 +114,6 @@ button {
 .form-container {
   position: relative;
   width: 100%;
-  padding-top: 75%; /* 4:3 ratio, adjust if needed */
   height: 620px;
 }
 
@@ -124,10 +123,10 @@ button {
   left: 0;
   width: 100%;
   height: 100%;
-  min-height: 600px; /* fallback height */
+  display: none; /* hidden until loaded */
 }
 
-</style>
+  </style>
 </head>
 <body>
   <div class="container my-4">
@@ -144,8 +143,6 @@ button {
         <form id="uploadForm">
           <div class="custom-file-upload mb-3 text-center">
             <input type="file" id="fileInput" required />
-            <!--<input class="form-control" type="file" id="fileInput" required>-->
-
             <label for="fileInput" class="btn btn-outline-primary">Choose File</label>
             <span id="fileName" class="ms-2 text-muted small">No file chosen</span>
           </div>
@@ -170,33 +167,19 @@ button {
         </div>
       </div>
 
-      <!-- Old Form Section 
-      <div id="formSection" class="section-box p-3" style="display:none;">
-        <h6 class="fw-semibold mb-3">📝 Complete Your Report</h6>
-        <div id="loader" class="spinner"></div>
-        <iframe id="msFormFrame" src="" allowfullscreen></iframe>
-        <div class="d-flex justify-content-center">
-          <button id="finishBtn" class="btn btn-danger mt-3">Finish & Close</button>
-        </div>
-        <div id="countdownMsg">Closing in <span id="countdown">3</span> seconds…</div>
-      </div> -->
-
-        <div id="formSection" style="display:none;">
+      <!-- Form Section -->
+      <div id="formSection" style="display:none;">
         <div id="loader">⏳ Loading form...</div>
         <div class="form-container">
-          <iframe id="msFormFrame" 
-                  style="border:none;" 
-                  allowfullscreen>
-          </iframe>
+          <iframe id="msFormFrame" style="border:none;" allowfullscreen></iframe>
         </div>
-        <div class="d-flex justify-content-center mt-7">
+        <div class="d-flex justify-content-center mt-3">
           <button id="finishBtn" class="btn btn-danger" style="display:none;">Finish & Close</button>
         </div>
         <p id="countdownMsg" style="display:none; text-align:center;">
           Closing in <span id="countdown"></span> seconds...
         </p>
       </div>
-
 
       <!-- Footer -->
       <div class="text-center mt-4 small text-muted">
@@ -234,12 +217,17 @@ let submissionID = "";
 
 uploadForm.addEventListener('submit', (e) => {
   e.preventDefault();
-  const fileInput = document.getElementById('fileInput');
   const file = fileInput.files[0];
-  if (!file) { message.style.color="red"; message.textContent="Please select a file."; return; }
+  if (!file) { 
+    message.style.color="red"; 
+    message.textContent="Please select a file."; 
+    return; 
+  }
 
-  message.textContent = "⏳ Uploading..."; message.style.color="black";
-  progressContainer.style.display = "block"; progressBar.style.width = "0%";
+  message.textContent = "⏳ Uploading..."; 
+  message.style.color="black";
+  progressContainer.style.display = "block"; 
+  progressBar.style.width = "0%";
 
   submissionID = generateCode();
   const newFileName = `${submissionID}-${file.name}`;
@@ -258,7 +246,9 @@ uploadForm.addEventListener('submit', (e) => {
     xhr.setRequestHeader("Content-Type", "application/json");
 
     xhr.upload.onprogress = function(e){
-      if(e.lengthComputable){ progressBar.style.width = (e.loaded/e.total*100)+"%"; }
+      if(e.lengthComputable){ 
+        progressBar.style.width = (e.loaded/e.total*100)+"%"; 
+      }
     };
 
     xhr.onload = function() {
@@ -267,9 +257,15 @@ uploadForm.addEventListener('submit', (e) => {
         message.textContent="✅ File uploaded successfully!";
         codeDisplay.textContent="Submission ID: "+submissionID;
         continueBtn.style.display="block";
-      } else { message.style.color="red"; message.textContent="❌ Upload failed: "+xhr.responseText; }
+      } else { 
+        message.style.color="red"; 
+        message.textContent="❌ Upload failed: "+xhr.responseText; 
+      }
     };
-    xhr.onerror = function(){ message.style.color="red"; message.textContent="❌ Upload error."; };
+    xhr.onerror = function(){ 
+      message.style.color="red"; 
+      message.textContent="❌ Upload error."; 
+    };
     xhr.send(body);
   };
 
@@ -281,7 +277,7 @@ continueBtn.addEventListener("click", ()=>{
   document.getElementById('formSection').style.display="block";
 
   const baseUrl = "https://forms.office.com/Pages/ResponsePage.aspx?id=rXQPLm8G6kSc-VV7PC-NSeWT8yXfPp1Jnc9wKq4L7J9UMERCSURWRVg1SThXVkhVU1hYSTZSVzNSTi4u&r388ad2dde4704c85a4bfca0f7a0468b8=0001&r598411bb4c17426b92deb8699b9b1fe2=%22Batam%22";
-  msFormFrame.src = `${baseUrl}&red1c88014cb24ac99c1bc085902d6354=${submissionID}`;
+  msFormFrame.src = `${baseUrl}&submissionID=${submissionID}`;
 
   finishBtn.style.display="block";
 });
@@ -306,8 +302,7 @@ msFormFrame.onload = function(){
   document.getElementById('loader').style.display='none';
   msFormFrame.style.display='block';
 };
-
-</script>
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
