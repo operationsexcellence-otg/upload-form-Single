@@ -41,6 +41,7 @@ body {
 /* iframe */
 iframe {
   width: 100%;
+  height: 1000px; /* fallback height */
   border: none;
   border-radius: 8px;
   background: #f9fafb;
@@ -238,7 +239,8 @@ continueBtn.addEventListener("click", ()=>{
   document.getElementById('uploadSection').style.display="none";
   document.getElementById('formSection').style.display="block";
 
-  const baseUrl = "https://forms.office.com/Pages/ResponsePage.aspx?id=rXQPLm8G6kSc-VV7PC-NSeWT8yXfPp1Jnc9wKq4L7J9UMERCSURWRVg1SThXVkhVU1hYSTZSVzNSTi4u&r388ad2dde4704c85a4bfca0f7a0468b8=0001&r598411bb4c17426b92deb8699b9b1fe2=%22Batam%22";
+  // ✅ Embed link with &embed=true
+  const baseUrl = "https://forms.office.com/Pages/ResponsePage.aspx?id=rXQPLm8G6kSc-VV7PC-NSeWT8yXfPp1Jnc9wKq4L7J9UMERCSURWRVg1SThXVkhVU1hYSTZSVzNSTi4u&embed=true";
   msFormFrame.src = `${baseUrl}&submissionID=${submissionID}`;
 
   finishBtn.style.display="block";
@@ -260,21 +262,10 @@ finishBtn.addEventListener("click", ()=>{
   },1000);
 });
 
-// ⚡ Auto-resize iframe when loaded
+// Show iframe after load
 msFormFrame.onload = function(){
   document.getElementById('loader').style.display='none';
   msFormFrame.style.display='block';
-
-  // Try to adjust height dynamically
-  setTimeout(()=>{
-    try {
-      const doc = msFormFrame.contentDocument || msFormFrame.contentWindow.document;
-      msFormFrame.style.height = doc.body.scrollHeight + "px";
-    } catch(e) {
-      // cross-origin: fallback fixed height
-      msFormFrame.style.height = "1200px";
-    }
-  }, 1000);
 };
   </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
