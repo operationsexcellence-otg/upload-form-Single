@@ -47,6 +47,23 @@ body {
 @media (max-width: 600px) {
   .report-card { padding: 15px; }
 }
+
+/* Hide default file input */
+input[type="file"] {
+  display: none;
+}
+
+.custom-file-upload label {
+  cursor: pointer;
+  min-width: 140px;
+}
+
+#fileName {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.85rem;
+  color: #6c757d;
+}
   </style>
 </head>
 <body>
@@ -63,12 +80,14 @@ body {
         <h6 class="fw-semibold mb-3">📎 Attach Files (Optional)</h6>
         <form id="uploadForm">
           <div class="custom-file-upload mb-3 text-center">
-            <input type="file" id="fileInput" required />
+            <input type="file" id="fileInput" />
             <label for="fileInput" class="btn btn-outline-primary">Choose File</label>
-            <span id="fileName" class="ms-2 text-muted small">No file chosen</span>
+            <div id="fileName" class="text-muted small mt-2">No file chosen</div>
           </div>
           <div class="d-flex justify-content-center">
-            <button type="submit" class="btn btn-primary">Upload File</button>
+            <button type="submit" id="uploadBtn" class="btn btn-primary" disabled>
+              Upload File
+            </button>
           </div>
         </form>
         <div class="progress mt-3" id="progressContainer" style="display:none;">
@@ -110,6 +129,7 @@ function generateCode(length = 6) {
 }
 
 const uploadForm = document.getElementById('uploadForm');
+const uploadBtn = document.getElementById('uploadBtn');
 const message = document.getElementById('message');
 const codeDisplay = document.getElementById('generatedCode');
 const progressContainer = document.getElementById('progressContainer');
@@ -124,9 +144,13 @@ const fileName = document.getElementById("fileName");
 const formWrapper = document.getElementById("formWrapper");
 
 fileInput.addEventListener("change", () => {
-  fileName.textContent = fileInput.files.length > 0 
-    ? fileInput.files[0].name 
-    : "No file chosen";
+  if (fileInput.files.length > 0) {
+    fileName.textContent = fileInput.files[0].name;
+    uploadBtn.disabled = false; // enable once a file is chosen
+  } else {
+    fileName.textContent = "No file chosen";
+    uploadBtn.disabled = true; // keep disabled if nothing
+  }
 });
 
 let submissionID = "";
@@ -139,6 +163,10 @@ uploadForm.addEventListener('submit', (e) => {
     message.textContent="Please select a file."; 
     return; 
   }
+
+  // Show spinner inside button
+  uploadBtn.disabled = true;
+  uploadBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>Uploading...`;
 
   message.textContent = "⏳ Uploading..."; 
   message.style.color="black";
@@ -168,6 +196,7 @@ uploadForm.addEventListener('submit', (e) => {
     };
 
     xhr.onload = function() {
+      uploadBtn.innerHTML = "Upload File";
       if(xhr.status>=200 && xhr.status<300){
         message.style.color="green";
         message.textContent="✅ File uploaded successfully!";
@@ -176,11 +205,14 @@ uploadForm.addEventListener('submit', (e) => {
       } else { 
         message.style.color="red"; 
         message.textContent="❌ Upload failed: "+xhr.responseText; 
+        uploadBtn.disabled = false;
       }
     };
     xhr.onerror = function(){ 
+      uploadBtn.innerHTML = "Upload File";
       message.style.color="red"; 
       message.textContent="❌ Upload error."; 
+      uploadBtn.disabled = false;
     };
     xhr.send(body);
   };
