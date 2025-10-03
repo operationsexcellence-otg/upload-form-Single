@@ -27,6 +27,7 @@
       cursor: pointer;
       background: #fdfdfd;
       transition: all 0.3s ease;
+      position: relative;
     }
     .upload-area:hover {
       background: #f1f3f5;
@@ -35,15 +36,41 @@
     .upload-area input[type=file] {
       display: none;
     }
+    /* Success effect */
+    .upload-area.success {
+      border-color: #198754;
+      background: #e9f9ef;
+    }
+    .upload-area.success::after {
+      content: "✔";
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 24px;
+      color: #198754;
+      animation: pop 0.4s ease;
+    }
+    @keyframes pop {
+      0% { transform: scale(0.2); opacity: 0; }
+      80% { transform: scale(1.2); opacity: 1; }
+      100% { transform: scale(1); }
+    }
     .btn-skip {
       background: #f8f9fa;
       border: 1px solid #ced4da;
       color: #212529;
       border-radius: 8px;
       padding: 10px 20px;
+      transition: background 0.3s;
     }
-    .btn-skip:hover {
+    .btn-skip:hover:enabled {
       background: #e9ecef;
+    }
+    .btn-skip:disabled {
+      background: #e9ecef;
+      color: #adb5bd;
+      border-color: #dee2e6;
+      cursor: not-allowed;
     }
   </style>
 </head>
@@ -65,7 +92,7 @@
         </p>
 
         <!-- Upload area -->
-        <label for="fileInput" class="upload-area d-block">
+        <label for="fileInput" id="uploadArea" class="upload-area d-block">
           <i class="bi bi-upload fs-2"></i>
           <p class="mt-2 mb-1">Drag and drop files here, or click to browse</p>
           <p class="small text-muted mb-0">Supports images, documents, and other file types</p>
@@ -115,6 +142,7 @@
     const continueBtn = document.getElementById('continueBtn');
     const skipBtn = document.getElementById('skipBtn');
     const msFormFrame = document.getElementById('msFormFrame');
+    const uploadArea = document.getElementById('uploadArea');
 
     let submissionID = "";
 
@@ -154,7 +182,7 @@
         });
 
         const xhr = new XMLHttpRequest();
-        xhr.open("POST","https://default2e0f74ad066f44ea9cf9557b3c2f8d.49.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/65342f7c857c426a9261ecdf20b640e8/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=ZJ8XkmkLidoYcDS5xtk3aUA0nEKIs18j4rnVi31BCHc"); // TODO: Replace
+        xhr.open("POST","YOUR-POWER-AUTOMATE-ENDPOINT"); // TODO: Replace
         xhr.setRequestHeader("Content-Type", "application/json");
 
         xhr.upload.onprogress = function(e){
@@ -169,7 +197,9 @@
             message.textContent="✅ File uploaded successfully!";
             codeDisplay.style.display = "inline-block";
             codeDisplay.textContent="Submission ID: "+submissionID;
-            continueBtn.style.display="block";  // show after success
+            continueBtn.style.display="block";  
+            skipBtn.disabled = true;  
+            uploadArea.classList.add("success"); // green border + checkmark
           } else { 
             message.style.color="red"; 
             message.textContent="❌ Upload failed: "+xhr.responseText; 
@@ -187,7 +217,7 @@
 
     // Skip button
     skipBtn.addEventListener("click", ()=>{
-      submissionID = generateCode(); // still generate ID
+      submissionID = generateCode(); 
       loadForm(submissionID);
     });
 
