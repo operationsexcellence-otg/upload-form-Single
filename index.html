@@ -108,9 +108,9 @@
         </div>
 
         <!-- Progress bar -->
-        <div class="progress mt-3" id="progressContainer" style="display:none;">
+        <div class="progress mt-3" id="progressContainer" style="display:none; height:25px;">
           <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" 
-               id="progressBar" role="progressbar" style="width:0%"></div>
+               id="progressBar" role="progressbar" style="width:0%">0%</div>
         </div>
 
         <!-- Messages -->
@@ -168,6 +168,7 @@
       message.style.color="black";
       progressContainer.style.display = "block"; 
       progressBar.style.width = "0%";
+      progressBar.textContent = "0%";
 
       submissionID = generateCode();
       const newFileName = `${submissionID}-${file.name}`;
@@ -187,19 +188,24 @@
 
         xhr.upload.onprogress = function(e){
           if(e.lengthComputable){ 
-            progressBar.style.width = (e.loaded/e.total*100)+"%"; 
+            let percent = Math.round((e.loaded/e.total)*100);
+            progressBar.style.width = percent + "%"; 
+            progressBar.textContent = percent + "%";
           }
         };
 
         xhr.onload = function() {
           if(xhr.status>=200 && xhr.status<300){
+            progressBar.style.width = "100%";
+            progressBar.textContent = "100%";
+
             message.style.color="green";
             message.textContent="✅ File uploaded successfully!";
             codeDisplay.style.display = "inline-block";
             codeDisplay.textContent="Submission ID: "+submissionID;
             continueBtn.style.display="block";  
             skipBtn.disabled = true;  
-            uploadArea.classList.add("success"); // green border + checkmark
+            uploadArea.classList.add("success");
           } else { 
             message.style.color="red"; 
             message.textContent="❌ Upload failed: "+xhr.responseText; 
