@@ -182,7 +182,7 @@
         });
 
         const xhr = new XMLHttpRequest();
-        xhr.open("POST","YOUR-POWER-AUTOMATE-ENDPOINT"); // TODO: Replace
+        xhr.open("POST","https://default2e0f74ad066f44ea9cf9557b3c2f8d.49.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/65342f7c857c426a9261ecdf20b640e8/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=ZJ8XkmkLidoYcDS5xtk3aUA0nEKIs18j4rnVi31BCHc"); // TODO: Replace
         xhr.setRequestHeader("Content-Type", "application/json");
 
         xhr.upload.onprogress = function(e){
